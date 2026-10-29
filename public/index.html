@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NLP Evolution Lab | Generative AI Module 1</title>
+  <meta name="description" content="Interactive Educational Lab tracing the evolution of NLP: Bag of Words -> Word Embeddings -> Transformers.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+
+  <!-- Top Announcement / Educational Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-group">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">NLP Evolution Lab</h1>
+          <p class="brand-subtitle">Generative AI • Module 1 Project: <span class="text-teal">Bag of Words → Word Embeddings → Transformers</span></p>
+        </div>
+      </div>
+      <div class="header-meta">
+        <span class="badge-pill badge-outline">College Lab Suite</span>
+        <span class="status-indicator live" id="system-status"><span class="dot"></span> Live Local PyTorch & Scikit Engine</span>
+      </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="main-nav">
+      <div class="nav-container">
+        <button class="nav-tab active" data-tab="playground">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 2v7.31M14 2v7.31M8.5 2h7M14 9.3a6.5 6.5 0 1 1-4 0"/></svg>
+          Text Playground
+        </button>
+        <button class="nav-tab" data-tab="similarity">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><path d="M11 8v6M8 11h6"/></svg>
+          Word Similarity
+        </button>
+        <button class="nav-tab" data-tab="attention">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" y1="22" x2="12" y2="12"/></svg>
+          Attention Explorer
+        </button>
+        <button class="nav-tab" data-tab="results">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Results & Benchmark
+        </button>
+        <button class="nav-tab" data-tab="about">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          About & Module 1 Guide
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main Application Body -->
+  <main class="app-main">
+
+    <!-- ==============================================
+         TAB 1: TEXT PLAYGROUND (Hero Focus)
+         ============================================== -->
+    <section id="tab-playground" class="tab-pane active">
+      <div class="section-intro">
+        <div class="intro-content">
+          <span class="section-tag">Primary Investigation</span>
+          <h2>Comparative Sentiment Playground</h2>
+          <p>Observe how three generations of NLP architectures process the same English sentence. Test basic sentiment, negation shifts, and syntactic nuances to witness architectural breakthroughs.</p>
+        </div>
+        <div class="score-alert-box">
+          <div class="alert-icon">⚠️</div>
+          <div class="alert-text">
+            <strong>Model Score Calibration Notice:</strong>
+            Scores reflect intra-model probabilities (TF-IDF calibrated Logistic vs. Continuous Bag of Words Centroid vs. Transformer Softmax). They are mathematically distinct and <em>cannot be compared directly as calibrated cross-model probabilities</em>.
+          </div>
+        </div>
+      </div>
+
+      <!-- Playground Input Card -->
+      <div class="card playground-card">
+        <div class="card-header-flex">
+          <label for="sentence-input" class="input-label">Enter Sentence for Cross-Architecture Analysis</label>
+          <div class="input-counter" id="char-counter">0 / 600 characters</div>
+        </div>
+
+        <div class="input-action-wrapper">
+          <textarea id="sentence-input" class="sentence-textarea" placeholder="Type a sentence here (e.g. 'This movie was not bad at all, in fact I quite liked it.')" rows="3"></textarea>
+          <div class="input-buttons-row">
+            <button id="btn-analyze" class="btn btn-primary">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Run Sentiment Comparison
+            </button>
+            <button id="btn-clear" class="btn btn-secondary">Clear</button>
+          </div>
+        </div>
+
+        <!-- Presets -->
+        <div class="presets-container">
+          <span class="presets-label">Quick Test Scenarios:</span>
+          <div class="preset-chips">
+            <button class="chip" data-text="The acting was phenomenal and the storyline was truly inspiring.">
+              <span class="chip-dot positive"></span> Positive Sentiment
+            </button>
+            <button class="chip" data-text="The plot was utterly predictable and the jokes were completely dead.">
+              <span class="chip-dot negative"></span> Negative Sentiment
+            </button>
+            <button class="chip highlight" data-text="This film was not bad at all, in fact I quite liked it.">
+              <span class="chip-dot negation"></span> Negation Challenge ("not bad")
+            </button>
+            <button class="chip" data-text="This was hardly the masterpiece that the trailers promised.">
+              <span class="chip-dot negation"></span> Subtle Inversion ("hardly")
+            </button>
+            <button class="chip" data-text="The movie has stunning visuals, but the story is completely hollow.">
+              <span class="chip-dot contrast"></span> Contrastive Clause ("but")
+            </button>
+            <button class="chip" data-text="I expected a total disaster, but was pleasantly surprised.">
+              <span class="chip-dot contrast"></span> Expectation Flip
+            </button>
+          </div>
+        </div>
+
+        <!-- Notification Banner -->
+        <div id="playground-alert" class="alert-banner hidden"></div>
+      </div>
+
+      <!-- Loading State -->
+      <div id="playground-loading" class="loading-state hidden">
+        <div class="spinner"></div>
+        <p>Executing live inference across TF-IDF, Dense Embeddings, and Transformer Encoder...</p>
+      </div>
+
+      <!-- Models Side-by-Side Comparison Grid -->
+      <div id="models-grid" class="models-grid">
+
+        <!-- Model 1: TF-IDF -->
+        <div class="card model-card tfidf-card">
+          <div class="model-badge-row">
+            <span class="era-tag">Stage 1 (1970s - 1990s)</span>
+            <span class="latency-badge" id="tfidf-latency">-- ms</span>
+          </div>
+          <h3 class="model-title">TF-IDF Baseline</h3>
+          <p class="model-subtitle">Bag-of-Words & Logistic Regression</p>
+
+          <div class="prediction-box" id="tfidf-pred-box">
+            <span class="pred-label" id="tfidf-prediction">--</span>
+            <span class="pred-confidence" id="tfidf-confidence">Score: --</span>
+          </div>
+
+          <div class="progress-bar-container">
+            <div class="progress-labels">
+              <span>Negative</span>
+              <span>Positive</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="tfidf-progress" style="width: 50%;"></div>
+            </div>
+          </div>
+
+          <div class="model-details">
+            <h4>Representation Properties:</h4>
+            <ul class="prop-list">
+              <li><strong>Dimensionality:</strong> High-dimensional sparse counts ($TF \times IDF$)</li>
+              <li><strong>Word Order:</strong> Discarded completely (unordered bag)</li>
+              <li><strong>Semantic Similarity:</strong> Zero ("movie" & "film" are orthogonal)</li>
+            </ul>
+
+            <div class="tokens-section">
+              <h4>Top Contributing Tokens:</h4>
+              <div class="tokens-cloud" id="tfidf-tokens-cloud">
+                <span class="empty-hint">Enter text to see active TF-IDF weights</span>
+              </div>
+            </div>
+
+            <div class="pedagogical-box">
+              <span class="ped-tag">Architectural Insight</span>
+              <p id="tfidf-pedagogy">Bag of Words represents sentences as term frequency histograms. When negation particles like "not" or "never" appear, the model lacks sequence awareness to bind the negation to its target word.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Model 2: Word Embeddings -->
+        <div class="card model-card embedding-card">
+          <div class="model-badge-row">
+            <span class="era-tag">Stage 2 (2013 - 2017)</span>
+            <span class="latency-badge" id="emb-latency">-- ms</span>
+          </div>
+          <h3 class="model-title">Word Embeddings</h3>
+          <p class="model-subtitle">Dense Vector Average (CBOW Centroid)</p>
+
+          <div class="prediction-box" id="emb-pred-box">
+            <span class="pred-label" id="emb-prediction">--</span>
+            <span class="pred-confidence" id="emb-confidence">Score: --</span>
+          </div>
+
+          <div class="progress-bar-container">
+            <div class="progress-labels">
+              <span>Negative</span>
+              <span>Positive</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="emb-progress" style="width: 50%;"></div>
+            </div>
+          </div>
+
+          <div class="model-details">
+            <h4>Representation Properties:</h4>
+            <ul class="prop-list">
+              <li><strong>Dimensionality:</strong> 50-dimensional dense semantic vectors</li>
+              <li><strong>Lexical Similarity:</strong> Preserved via vector distance (GloVe/Word2Vec)</li>
+              <li><strong>Word Order:</strong> Lost via sentence vector average pooling</li>
+            </ul>
+
+            <div class="tokens-section">
+              <h4>Vocabulary Coverage:</h4>
+              <div class="coverage-bar-group">
+                <div class="coverage-text" id="emb-coverage-text">Coverage: --%</div>
+                <div class="vector-preview-box" id="emb-vector-preview">Vector centroid preview: [--, --, --]</div>
+              </div>
+            </div>
+
+            <div class="pedagogical-box">
+              <span class="ped-tag">Architectural Insight</span>
+              <p id="emb-pedagogy">Dense embeddings map synonyms to neighboring points in continuous vector space. However, average pooling collapses word order: "not good" averages into a diluted centroid, masking negation.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Model 3: Transformer -->
+        <div class="card model-card transformer-card highlight-border">
+          <div class="model-badge-row">
+            <span class="era-tag transformer-tag">Stage 3 (2017 - Present)</span>
+            <span class="latency-badge" id="tr-latency">-- ms</span>
+          </div>
+          <h3 class="model-title">Transformer Classifier</h3>
+          <p class="model-subtitle">Contextualized Multi-Head Self-Attention</p>
+
+          <div class="prediction-box" id="tr-pred-box">
+            <span class="pred-label" id="tr-prediction">--</span>
+            <span class="pred-confidence" id="tr-confidence">Softmax: --</span>
+          </div>
+
+          <div class="progress-bar-container">
+            <div class="progress-labels">
+              <span>Negative</span>
+              <span>Positive</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="tr-progress" style="width: 50%;"></div>
+            </div>
+          </div>
+
+          <div class="model-details">
+            <h4>Representation Properties:</h4>
+            <ul class="prop-list">
+              <li><strong>Self-Attention:</strong> All token pairs interact simultaneously</li>
+              <li><strong>Contextualized Tokens:</strong> "bank" changes with surrounding context</li>
+              <li><strong>Compositionality:</strong> Resolves negation scopes and discourse markers</li>
+            </ul>
+
+            <div class="tokens-section">
+              <h4>Contextual Tokens & Attention:</h4>
+              <div class="tokens-cloud" id="tr-tokens-cloud">
+                <span class="empty-hint">Enter text to see contextualized tokens</span>
+              </div>
+              <button class="btn btn-sm btn-outline-teal mt-2" id="btn-jump-attention">
+                Open in Attention Explorer →
+              </button>
+            </div>
+
+            <div class="pedagogical-box">
+              <span class="ped-tag">Architectural Insight</span>
+              <p id="tr-pedagogy">Self-attention computes $Q \times K^T / \sqrt{d_k}$, allowing the modifier "not" to project information directly into the representation of "bad", correctly inverting the sentiment.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==============================================
+         TAB 2: WORD SIMILARITY (Static Embeddings)
+         ============================================== -->
+    <section id="tab-similarity" class="tab-pane">
+      <div class="section-intro">
+        <span class="section-tag">Dense Geometric Space</span>
+        <h2>Word Embedding Vector Similarity</h2>
+        <p>Explore how words are mapped to continuous 50-dimensional vectors. Calculate actual Cosine Similarity between word embeddings and discover why antonyms behave unexpectedly under the Distributional Hypothesis.</p>
+      </div>
+
+      <div class="similarity-layout">
+        <div class="card similarity-calc-card">
+          <div class="similarity-inputs-grid">
+            <div class="input-field-group">
+              <label for="word1-input">Word 1</label>
+              <input type="text" id="word1-input" class="word-input" placeholder="e.g. king" value="king">
+            </div>
+            <div class="sim-symbol">VS</div>
+            <div class="input-field-group">
+              <label for="word2-input">Word 2</label>
+              <input type="text" id="word2-input" class="word-input" placeholder="e.g. queen" value="queen">
+            </div>
+          </div>
+
+          <div class="text-center mt-3">
+            <button id="btn-calc-similarity" class="btn btn-primary">Compute Cosine Similarity</button>
+          </div>
+
+          <!-- Quick Pair Presets -->
+          <div class="presets-container mt-4">
+            <span class="presets-label">Explore Concept Pairs:</span>
+            <div class="preset-chips">
+              <button class="chip-sim" data-w1="king" data-w2="queen">👑 king vs queen (Analogy)</button>
+              <button class="chip-sim" data-w1="smart" data-w2="intelligent">💡 smart vs intelligent (Synonyms)</button>
+              <button class="chip-sim highlight" data-w1="hot" data-w2="cold">🔥 hot vs cold (Antonyms Paradox)</button>
+              <button class="chip-sim" data-w1="doctor" data-w2="nurse">🏥 doctor vs nurse (Domain)</button>
+              <button class="chip-sim" data-w1="computer" data-w2="algorithm">💻 computer vs algorithm (Tech)</button>
+              <button class="chip-sim" data-w1="good" data-w2="bad">⚖️ good vs bad (Polarity Pair)</button>
+              <button class="chip-sim" data-w1="banana" data-w2="quantum">🍌 banana vs quantum (Orthogonal)</button>
+              <button class="chip-sim" data-w1="movie" data-w2="xyzunknown">❓ test OOV Out-of-Vocab</button>
+            </div>
+          </div>
+
+          <!-- Similarity Result Container -->
+          <div id="similarity-result" class="similarity-result-box mt-4">
+            <div class="sim-metric-display">
+              <div class="sim-score-circle" id="sim-score-circle">
+                <span class="sim-score-val" id="sim-score-val">--</span>
+                <span class="sim-score-lbl">Cosine Sim</span>
+              </div>
+              <div class="sim-meta-info">
+                <h4 id="sim-interpretation-title">Select two words</h4>
+                <p id="sim-interpretation-desc">Click compute or pick a preset pair above to view vector distance.</p>
+                <div class="formula-box">
+                  $$\cos(\mathbf{u}, \mathbf{v}) = \frac{\mathbf{u} \cdot \mathbf{v}}{\|\mathbf{u}\|_2 \|\mathbf{v}\|_2}$$
+                  <div class="formula-subs" id="formula-subs">$\mathbf{u} \cdot \mathbf{v} = --, \quad \|\mathbf{u}\| = --, \quad \|\mathbf{v}\| = --$</div>
+                </div>
+              </div>
+            </div>
+
+            <div id="oov-warning" class="alert-banner warning hidden"></div>
+
+            <div class="vector-inspect-row mt-3">
+              <div class="vec-box">
+                <h5>Vector Preview: <span id="vec-w1-name">word 1</span></h5>
+                <code id="vec-w1-code">[...]</code>
+              </div>
+              <div class="vec-box">
+                <h5>Vector Preview: <span id="vec-w2-name">word 2</span></h5>
+                <code id="vec-w2-code">[...]</code>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card similarity-theory-card">
+          <div class="card-header">
+            <h3>The Distributional Hypothesis</h3>
+            <span class="badge-pill">J.R. Firth (1957)</span>
+          </div>
+          <blockquote class="firth-quote">
+            "You shall know a word by the company it keeps."
+          </blockquote>
+          <p>Word embeddings (like Word2Vec and GloVe) represent words as continuous vectors based on the contexts in which they appear.</p>
+          
+          <h4 class="mt-3">The Antonym Paradox:</h4>
+          <p>Why do opposites like <em>hot</em> and <em>cold</em> or <em>good</em> and <em>bad</em> have high cosine similarity? Because they appear in identical grammatical patterns:</p>
+          <ul class="prop-list">
+            <li>"The coffee was too <strong>hot</strong> to drink."</li>
+            <li>"The coffee was too <strong>cold</strong> to drink."</li>
+          </ul>
+          <p>Because their surrounding contexts are interchangeable, the model places them near each other in vector space!</p>
+
+          <h4 class="mt-3">Static Embeddings Limitation (Polysemy):</h4>
+          <p>In static embeddings, a word has exactly <strong>one</strong> vector. The word <em>"bank"</em> in <em>"river bank"</em> and <em>"investment bank"</em> receives the identical vector! This polysemy problem was the fundamental catalyst for the invention of <strong>Transformers</strong>.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==============================================
+         TAB 3: ATTENTION EXPLORER (Self-Attention)
+         ============================================== -->
+    <section id="tab-attention" class="tab-pane">
+      <div class="section-intro">
+        <span class="section-tag">Transformer Architecture</span>
+        <h2>Token-to-Token Attention Explorer</h2>
+        <p>Inspect the internal self-attention weight matrix $A_{i,j} = \text{Softmax}\left(\frac{Q K^T}{\sqrt{d_k}}\right)$ of the PyTorch Transformer. Toggle between genuine computed model outputs and annotated illustrative demos.</p>
+      </div>
+
+      <!-- Mode & Controls Bar -->
+      <div class="card attention-controls-card">
+        <div class="controls-grid">
+          <div class="control-item">
+            <label for="attn-mode-select">Evaluation Mode:</label>
+            <select id="attn-mode-select" class="select-control">
+              <option value="real" selected>Live PyTorch Computed Attention</option>
+              <option value="illustrative">Illustrative Demo (Curated Classroom Example)</option>
+            </select>
+          </div>
+
+          <div class="control-item">
+            <label for="attn-layer-select">Encoder Layer:</label>
+            <select id="attn-layer-select" class="select-control">
+              <option value="0">Layer 1 (Local Syntax & Adjacency)</option>
+              <option value="1">Layer 2 (Semantic & [CLS] Polling)</option>
+            </select>
+          </div>
+
+          <div class="control-item">
+            <label for="attn-head-select">Attention Head:</label>
+            <select id="attn-head-select" class="select-control">
+              <option value="0">Head 1</option>
+              <option value="1">Head 2</option>
+              <option value="2">Head 3</option>
+              <option value="3">Head 4</option>
+            </select>
+          </div>
+
+          <div class="control-item flex-end">
+            <button id="btn-refresh-attn" class="btn btn-primary btn-sm">Refresh Heatmap</button>
+          </div>
+        </div>
+
+        <div class="active-sentence-bar">
+          <span class="active-sentence-label">Analyzed Sentence:</span>
+          <span id="attn-active-sentence" class="active-sentence-text">"This movie was not bad at all"</span>
+          <span id="attn-mode-badge" class="badge-pill badge-teal">Live PyTorch Output</span>
+        </div>
+      </div>
+
+      <!-- Heatmap Display & Token Focus Section -->
+      <div class="attention-layout mt-4">
+        <div class="card heatmap-card">
+          <div class="card-header-flex">
+            <div>
+              <h3 id="heatmap-head-title">Attention Heatmap (Queries vs Keys)</h3>
+              <p id="heatmap-head-desc" class="text-muted">Softmax attention weights: Row token (Query) attends to Column token (Key).</p>
+            </div>
+            <div class="heatmap-legend">
+              <span>0.0 (Min)</span>
+              <div class="legend-gradient"></div>
+              <span>1.0 (Max)</span>
+            </div>
+          </div>
+
+          <!-- Heatmap Matrix Table -->
+          <div class="heatmap-container" id="heatmap-container">
+            <div class="loading-state">Generating attention matrix...</div>
+          </div>
+
+          <div class="token-inspection-panel mt-3" id="token-inspection-panel">
+            <span class="hint-text">💡 <strong>Interactive Feature:</strong> Click or hover any row token above to isolate its outgoing attention distribution across the sentence.</span>
+          </div>
+        </div>
+
+        <div class="card attention-notes-card">
+          <div class="card-header">
+            <h3>Self-Attention Mechanics</h3>
+            <span class="badge-pill">Vaswani et al. (2017)</span>
+          </div>
+
+          <div class="formula-box mb-3">
+            $$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$$
+          </div>
+
+          <div class="pedagogical-box warning mb-3">
+            <span class="ped-tag">⚠️ Critical Educational Caveat</span>
+            <p><strong>Attention Is Not (Always) Explanation:</strong> High attention weight between two tokens indicates where intermediate representation matrices pooled values, but attention does not guarantee causality or feature necessity in the final decision layer (Jain & Wallace 2019).</p>
+          </div>
+
+          <h4>What to Look for in This Head:</h4>
+          <ul class="prop-list" id="attn-observations-list">
+            <li><strong>Negation Binding:</strong> Notice how the token <code>"not"</code> attends heavily to <code>"bad"</code>, allowing the model to capture the phrase boundary.</li>
+            <li><strong>[CLS] Representation:</strong> The classification token at position 0 accumulates sentiment polarity across all tokens.</li>
+            <li><strong>Multi-Head Diversity:</strong> Different heads specialize in positional proximity, syntactic agreement, or discourse connectors like "but".</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==============================================
+         TAB 4: RESULTS & BENCHMARK (Held-out Evaluation)
+         ============================================== -->
+    <section id="tab-results" class="tab-pane">
+      <div class="section-intro">
+        <div class="intro-content">
+          <span class="section-tag">Empirical Evaluation</span>
+          <h2>Held-Out Evaluation Suite</h2>
+          <p>Scientific comparison of all three NLP paradigms evaluated on identical held-out test examples (strictly unseen during model training). Review accuracy, inference speed, and failure audits.</p>
+        </div>
+        <div class="intro-actions">
+          <a href="/api/export-benchmark-csv" class="btn btn-primary" download="nlp_evolution_benchmark.csv">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export Results as CSV
+          </a>
+        </div>
+      </div>
+
+      <!-- Small Dataset Disclaimer Banner -->
+      <div class="pedagogical-box info mb-4">
+        <div class="flex-align-start">
+          <span class="ped-tag">Methodology Caveat</span>
+          <p><strong>Small Test Suite Limitation:</strong> This held-out test suite (20 curated benchmark sentences) is specifically designed to demonstrate <em>structural linguistic boundaries</em> (such as negation scope and contrastive clauses). While it illuminates qualitative failure modes where BoW and static embeddings fail, a small test set cannot establish general statistical model superiority across broader distribution shifts. Real-world evaluation requires thousands of benchmark samples (e.g. GLUE, SST-5).</p>
+        </div>
+      </div>
+
+      <!-- Benchmark Metrics Cards Grid -->
+      <div class="results-metrics-grid" id="results-metrics-grid">
+        <!-- TF-IDF Metric Card -->
+        <div class="card metric-card">
+          <div class="metric-header">
+            <h4>TF-IDF Baseline</h4>
+            <span class="badge-pill">Bag of Words</span>
+          </div>
+          <div class="metric-value-row">
+            <span class="metric-large" id="res-tfidf-acc">--%</span>
+            <span class="metric-sub" id="res-tfidf-counts">-- / -- correct</span>
+          </div>
+          <div class="metric-footer">
+            <span>Avg Latency:</span>
+            <strong id="res-tfidf-time">-- ms</strong>
+          </div>
+        </div>
+
+        <!-- Embedding Metric Card -->
+        <div class="card metric-card">
+          <div class="metric-header">
+            <h4>Word Embeddings</h4>
+            <span class="badge-pill">Dense Averaging</span>
+          </div>
+          <div class="metric-value-row">
+            <span class="metric-large" id="res-emb-acc">--%</span>
+            <span class="metric-sub" id="res-emb-counts">-- / -- correct</span>
+          </div>
+          <div class="metric-footer">
+            <span>Avg Latency:</span>
+            <strong id="res-emb-time">-- ms</strong>
+          </div>
+        </div>
+
+        <!-- Transformer Metric Card -->
+        <div class="card metric-card highlight-border">
+          <div class="metric-header">
+            <h4>Transformer</h4>
+            <span class="badge-pill badge-teal">Self-Attention</span>
+          </div>
+          <div class="metric-value-row">
+            <span class="metric-large text-teal" id="res-tr-acc">--%</span>
+            <span class="metric-sub" id="res-tr-counts">-- / -- correct</span>
+          </div>
+          <div class="metric-footer">
+            <span>Avg Latency:</span>
+            <strong id="res-tr-time">-- ms</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detailed Test Cases & Error Analysis Table -->
+      <div class="card table-card mt-4">
+        <div class="card-header-flex">
+          <div>
+            <h3>Error Analysis & Breakdown by Linguistic Category</h3>
+            <p class="text-muted">Inspect where older architectures stumble and where Transformers succeed.</p>
+          </div>
+          <div class="table-filter-group">
+            <label for="filter-category">Filter Category:</label>
+            <select id="filter-category" class="select-control">
+              <option value="all">All Categories (20)</option>
+              <option value="Standard Positive">Standard Positive</option>
+              <option value="Standard Negative">Standard Negative</option>
+              <option value="Negation Challenge">Negation Challenges</option>
+              <option value="Contrastive Clauses">Contrastive Clauses</option>
+              <option value="errors-only">Show Any Model Error</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-responsive mt-3">
+          <table class="benchmark-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Test Sentence</th>
+                <th>Category</th>
+                <th>Ground Truth</th>
+                <th>TF-IDF</th>
+                <th>Embeddings</th>
+                <th>Transformer</th>
+                <th>Linguistic Rationale</th>
+              </tr>
+            </thead>
+            <tbody id="benchmark-tbody">
+              <tr><td colspan="8" class="text-center p-4">Loading evaluation data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==============================================
+         TAB 5: ABOUT & MODULE 1 GUIDE
+         ============================================== -->
+    <section id="tab-about" class="tab-pane">
+      <div class="section-intro">
+        <span class="section-tag">Educational Syllabus & Context</span>
+        <h2>Module 1: Evolution of NLP Representation</h2>
+        <p>A comprehensive educational guide connecting the laboratory tools to Generative AI foundational concepts, team contributions, and presentation demo scenarios.</p>
+      </div>
+
+      <!-- 3 Presentation Demo Scenarios -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h3>Classroom Presentation Demo Scenarios</h3>
+          <span class="badge-pill badge-teal">Ready for Project Defense</span>
+        </div>
+        <p class="mb-3">Use these three scripted scenarios during project evaluations, viva, or lab presentations to demonstrate core findings systematically:</p>
+
+        <div class="scenarios-grid" id="scenarios-grid">
+          <!-- Populated dynamically via JS / API -->
+        </div>
+      </div>
+
+      <!-- Evolution Timeline Cards -->
+      <div class="evolution-timeline">
+        <!-- Stage 1 -->
+        <div class="card timeline-card">
+          <div class="timeline-badge">Stage 1</div>
+          <h3>Bag of Words & TF-IDF (1970s - 1990s)</h3>
+          <p class="lead-text">Discrete, sparse frequency counters that treat sentences as unordered bags of words.</p>
+          
+          <h4>Mathematical Principle:</h4>
+          <div class="formula-box">
+            $$\text{TF-IDF}(t, d, D) = \text{TF}(t, d) \times \log\left(\frac{|D|}{|\{d \in D : t \in d\}|}\right)$$
+          </div>
+
+          <h4>Core Strengths:</h4>
+          <ul class="prop-list">
+            <li>Extremely fast training and microsecond inference.</li>
+            <li>Interpretable feature coefficients (each word has an explicit linear weight).</li>
+            <li>No GPU or deep learning framework required.</li>
+          </ul>
+
+          <h4>Fatal Limitations:</h4>
+          <ul class="prop-list negative">
+            <li><strong>Curse of Dimensionality:</strong> Vocabulary size dictates vector length (often 10,000+ sparse zeros).</li>
+            <li><strong>Zero Semantic Generalization:</strong> "Great" and "wonderful" are as mathematically distant as "great" and "refrigerator".</li>
+            <li><strong>No Word Order:</strong> "Dog bites man" and "Man bites dog" produce identical representations.</li>
+          </ul>
+        </div>
+
+        <!-- Stage 2 -->
+        <div class="card timeline-card">
+          <div class="timeline-badge">Stage 2</div>
+          <h3>Dense Static Word Embeddings (2013 - 2017)</h3>
+          <p class="lead-text">Distributed representations mapping words into continuous dense vector spaces (Word2Vec, GloVe, FastText).</p>
+
+          <h4>Mathematical Principle:</h4>
+          <div class="formula-box">
+            $$J = \sum_{i,j=1}^V f(X_{ij}) \left( w_i^T \tilde{w}_j + b_i + \tilde{b}_j - \log X_{ij} \right)^2$$
+          </div>
+
+          <h4>Core Strengths:</h4>
+          <ul class="prop-list">
+            <li>Compact fixed dimension (typically 50 to 300 dimensions).</li>
+            <li>Captures semantic proximity and geometric analogies ($v_{\text{king}} - v_{\text{man}} + v_{\text{woman}} \approx v_{\text{queen}}$).</li>
+            <li>Substantially improves generalization across synonymous terms.</li>
+          </ul>
+
+          <h4>Fatal Limitations:</h4>
+          <ul class="prop-list negative">
+            <li><strong>Average Pooling Dilution:</strong> Averaging sentence vectors washes out word order and negation.</li>
+            <li><strong>Static Polysemy Problem:</strong> A word has only one vector, regardless of whether it's "bank of a river" or "financial bank".</li>
+            <li><strong>Out-of-Vocabulary (OOV):</strong> Cannot represent unseen words without fallback to subword character n-grams.</li>
+          </ul>
+        </div>
+
+        <!-- Stage 3 -->
+        <div class="card timeline-card highlight-border">
+          <div class="timeline-badge stage-3">Stage 3</div>
+          <h3>Contextualized Transformers (2017 - Present)</h3>
+          <p class="lead-text">Multi-Head Self-Attention architectures that compute bidirectional, contextualized representations for every token.</p>
+
+          <h4>Mathematical Principle:</h4>
+          <div class="formula-box">
+            $$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$$
+          </div>
+
+          <h4>Core Strengths:</h4>
+          <ul class="prop-list">
+            <li><strong>Contextual Embeddings:</strong> Words change vector representation based on surrounding tokens.</li>
+            <li><strong>Bidirectional Context:</strong> Captures dependencies regardless of distance in the sentence.</li>
+            <li><strong>Handles Compositional Semantics:</strong> Correctly maps negation operators ("not bad") and discourse connectives ("but").</li>
+          </ul>
+
+          <h4>Trade-offs & Considerations:</h4>
+          <ul class="prop-list negative">
+            <li>Quadratic computational complexity $O(n^2)$ with sequence length.</li>
+            <li>Requires substantial memory, parameters, and modern compute hardware.</li>
+            <li>Attention maps show routing but do not furnish complete causal explanations.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Module 1 Alignment & Project Metadata -->
+      <div class="card mt-4">
+        <div class="card-header">
+          <h3>Connection to Generative AI Course Curriculum</h3>
+          <span class="badge-pill">Module 1 Alignment</span>
+        </div>
+        <p>This interactive laboratory directly implements the learning outcomes of <strong>Module 1: Foundations of Natural Language Processing & Representation Learning</strong>:</p>
+        <div class="grid-2col mt-3">
+          <div class="info-block">
+            <h4>Theoretical Outcomes Covered:</h4>
+            <ul class="prop-list">
+              <li>Discrete vs Continuous text representations</li>
+              <li>Vector space models and Cosine Similarity metrics</li>
+              <li>The Distributional Hypothesis and Word2Vec/GloVe geometry</li>
+              <li>Self-attention equations and Multi-Head projection mechanics</li>
+              <li>Empirical benchmarking and error analysis methodology</li>
+            </ul>
+          </div>
+          <div class="info-block">
+            <h4>Dataset & Model Citations:</h4>
+            <ul class="prop-list">
+              <li><strong>Stanford Sentiment Treebank (SST-2):</strong> Socher et al. (2013)</li>
+              <li><strong>GloVe (Global Vectors for Word Representation):</strong> Pennington et al. (2014)</li>
+              <li><strong>Attention Is All You Need:</strong> Vaswani et al. (NeurIPS 2017)</li>
+              <li><strong>Attention is not Explanation:</strong> Jain & Wallace (NAACL 2019)</li>
+              <li><strong>Scikit-Learn:</strong> Pedregosa et al. (JMLR 2011) & PyTorch (Paszke et al. 2019)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Team Contribution Placeholders -->
+      <div class="card mt-4">
+        <div class="card-header">
+          <h3>Project Team Contributions</h3>
+          <span class="badge-pill">4 Contributor Placeholders</span>
+        </div>
+        <div class="team-grid mt-3">
+          <div class="team-card">
+            <div class="team-avatar">TM 1</div>
+            <h4>Team Member 1</h4>
+            <span class="team-role">Model Architecture & Training</span>
+            <p>Designed the TF-IDF vectorizer pipeline, embedding centroid classifier, and PyTorch Transformer fine-tuning script.</p>
+          </div>
+          <div class="team-card">
+            <div class="team-avatar">TM 2</div>
+            <h4>Team Member 2</h4>
+            <span class="team-role">Backend API & Evaluation Suite</span>
+            <p>Built the Flask REST API, held-out test split, benchmark runner, and CSV data serialization pipeline.</p>
+          </div>
+          <div class="team-card">
+            <div class="team-avatar">TM 3</div>
+            <h4>Team Member 3</h4>
+            <span class="team-role">Frontend UI & Interactive Heatmap</span>
+            <p>Engineered the responsive dashboard, live sentiment comparison layout, and dynamic token-to-token attention heatmap.</p>
+          </div>
+          <div class="team-card">
+            <div class="team-avatar">TM 4</div>
+            <h4>Team Member 4</h4>
+            <span class="team-role">Benchmarking & Documentation</span>
+            <p>Curated linguistic test instances (negation, contrastive clauses), authored educational guide, and prepared presentation scripts.</p>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <p>© NLP Evolution Lab • Developed for College Generative AI Module 1 Coursework.</p>
+      <p class="footer-note">All sample predictions and illustrative charts are transparently marked for educational integrity.</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
+
